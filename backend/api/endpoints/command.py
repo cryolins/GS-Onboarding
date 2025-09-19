@@ -23,7 +23,7 @@ def get_commands(db: Session = Depends(get_db)):
 
 
 @command_router.post("/", response_model=CommandSingleResponse)
-def create_command(payload: CommandRequest):
+def create_command(payload: CommandRequest, db: Session = Depends(get_db)):
     """
     Creates an item with the given payload in the database and returns this payload after pulling it from the database 
 
@@ -33,17 +33,17 @@ def create_command(payload: CommandRequest):
     # TODO:(Member) Implement this endpoint
     command1 = Command(command_type=payload.command_type, params=payload.params)
 
-    with get_db() as db:
-        db.add(command1)
-        db.commit()
+    db.add(command1)
+    db.commit()
+    db.refresh(command1)
 
-        query = select(Command).where(Command.id == command1.id)
-        item = db.exec(query).one()
+    query = select(Command).where(Command.id == command1.id)
+    item = db.exec(query).one()
     return {"data" : item}                      
 
 
 @command_router.delete("/{id}", response_model=CommandListResponse)
-def delete_command(id: int):
+def delete_command(id: int, db: Session = Depends(get_db)):
     """
     Deletes the item with the given id if it exists. Otherwise raises a 404 error.
 
@@ -51,16 +51,16 @@ def delete_command(id: int):
     :return: returns the list of commands after deleting the item
     """
     # TODO:(Member) Implement this endpoint
-    with get_db() as db:
-        query = select(Command).where(Command.id == id)
-        item = db.exec(query).first()
+    # with get_db() as db:
+    query = select(Command).where(Command.id == id)
+    item = db.exec(query).first()
 
-        if(item is None):
-            raise HTTPException(status_code=404)
+    if(item is None):
+        raise HTTPException(status_code=404)
 
-        db.delete(item)
-        db.commit()
+    db.delete(item)
+    db.commit()
 
-        items = db.exec(select(Command)).all()
+    items = db.exec(select(Command)).all()
 
     return {"data": items}
