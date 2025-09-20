@@ -34,9 +34,12 @@ class MainCommand(BaseSQLModel, table=True):
         """
         if(self.params is None and self.format is None):
             return self
-        if(self.params is None or self.format is None 
-        or self.params.count(",") != self.format.count(",")):
-            raise ValueError()
+        if(self.params is None):
+            raise ValueError("Error: params is empty")
+        elif(self.format is None):
+            raise ValueError("Error: format is empty")
+        elif(self.params.count(",") != self.format.count(",")):
+            raise ValueError("Error: params and format have a different number of values")
         return self
 
 
