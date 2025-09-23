@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { CommandResponse, MainCommandResponse, MainCommandListResponse } from "../data/response"
 import "./command_input.css"
 import { createCommand, getMainCommands } from "./input_api";
+import { getCommands } from "../display/command_api";
 
 interface CommandInputProp {
   setCommands: React.Dispatch<React.SetStateAction<CommandResponse[]>>
@@ -18,7 +19,7 @@ const CommandInput = ({ setCommands }: CommandInputProp) => {
     () => {
       const fetchMainCommands = async () => {
         const fetchedMainCommands = await getMainCommands();
-        console.log("fetched mainCommands");
+        //console.log("fetched mainCommands");
         setMainCommands(fetchedMainCommands);
       }
       fetchMainCommands();
@@ -37,7 +38,9 @@ const CommandInput = ({ setCommands }: CommandInputProp) => {
     // TODO:(Member) Submit to your post endpoint 
     e.preventDefault();
     if(selectedCommand != null){
-      createCommand({command_type: selectedCommand.id, params: selectedCommand.params})
+      await createCommand({command_type: selectedCommand.id, params: selectedCommand.params});
+      const refreshedData = await getCommands();
+      setCommands(refreshedData.data);
     }
     else{
       console.error("command was not selected");
